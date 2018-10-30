@@ -7,7 +7,7 @@ from pytest import raises, approx
 
 def test():
     import invsearch
-    pass
+    invsearch.InvIndex
 
 
 if __name__ == "__main__":
