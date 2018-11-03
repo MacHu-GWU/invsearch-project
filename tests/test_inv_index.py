@@ -2,29 +2,27 @@
 
 import pytest
 from pytest import raises
+from sentinels import NOTHING
 from invsearch.inv_index import InvIndex
+from pprint import pprint
 
 data_list = [
-    {"id": 1, "name": "Alice"},
-    {"id": 2, "name": "Bob"},
-    {"id": 3, "name": "Cathy"},
-    {"id": 4, "name": "Bob"},
+    {"id": 1, "name": "Alice", "friends": [2, 3]},
+    {"id": 2, "name": "Bob", "age": 15, "friends": [1, 3]},
+    {"id": 3, "name": "Cathy", "age": None, "friends": [1, 2]},
+    {"id": 4, "name": "Bob", "age": None},
 ]
 data_dict = {
     "id": [1, 2, 3, 4],
-    "name": ["Alice", "Bob", "Cathy", "Bob"]
+    "name": ["Alice", "Bob", "Cathy", "Bob"],
+    "age": [NOTHING, 15, None, None],
+    "friends": [[2, 3], [1, 3], [1, 2], NOTHING]
 }
 
 
 class InvIndexTestBase(object):
     def test_implementation(self):
-        assert self.ii._data == {
-            0: {"id": 1, "name": "Alice"},
-            1: {"id": 2, "name": "Bob"},
-            2: {"id": 3, "name": "Cathy"},
-            3: {"id": 4, "name": "Bob"},
-        }
-        assert self.ii._columns == ["id", "name"]
+        assert self.ii._columns == ["age", "friends", "id", "name"]
         assert self.ii._pk_columns == {"id", }
         assert self.ii._index == {
             "id": {
@@ -37,6 +35,11 @@ class InvIndexTestBase(object):
                 "Cathy": {2, },
                 "Bob": {1, 3},
                 "Alice": {0, },
+            },
+            "age": {
+                NOTHING: {0, },
+                15: {1, },
+                None: {2, 3},
             },
         }
 
@@ -74,13 +77,40 @@ class InvIndexTestBase(object):
         with raises(ValueError):
             self.ii.find_one(filters=dict(name="Bob"))
 
+    def test_by_id(self):
+        assert self.ii.by_id(id=1)["id"] == 1
+        assert self.ii.by_id(id=2)["id"] == 2
+
+        with raises(ValueError):
+            self.ii.by_id(id=999)
+
+    def test_slow_find(self):
+        assert {dct["id"] for dct in self.ii.slow_find(name="Bob")} == {2, 4}
+        assert {dct["id"] for dct in self.ii.slow_find(friends=[1, 2])} == {3, }
+
 
 class TestInvIndexFromDataList(InvIndexTestBase):
     ii = InvIndex(data=data_list)
 
+    def test_implementation_data_part(self):
+        assert self.ii._data == {
+            0: {"id": 1, "name": "Alice", "friends": [2, 3]},
+            1: {"id": 2, "name": "Bob", "age": 15, "friends": [1, 3]},
+            2: {"id": 3, "name": "Cathy", "age": None, "friends": [1, 2]},
+            3: {"id": 4, "name": "Bob", "age": None},
+        }
+
 
 class TestInvIndexFromDataDict(InvIndexTestBase):
     ii = InvIndex(data=data_dict)
+
+    def test_implementation_data_part(self):
+        assert self.ii._data == {
+            0: {"id": 1, "name": "Alice", "age": NOTHING, "friends": [2, 3]},
+            1: {"id": 2, "name": "Bob", "age": 15, "friends": [1, 3]},
+            2: {"id": 3, "name": "Cathy", "age": None, "friends": [1, 2]},
+            3: {"id": 4, "name": "Bob", "age": None, "friends": NOTHING},
+        }
 
 
 def test_complex_init():
