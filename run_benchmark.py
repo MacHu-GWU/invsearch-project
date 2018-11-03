@@ -115,23 +115,23 @@ def run_benchmark():
 
         st = time.clock()
         for name in name_list:
-            results = ii1.find(dict(name=name))
+            results = ii1.find(name=name)
         elapse1 = time.clock() - st
 
         st = time.clock()
         for name in name_list:
-            results = ii2.find(dict(name=name))
+            results = ii2.find(filters=dict(name=name))
         elapse2 = time.clock() - st
 
         st = time.clock()
         for name in name_list:
-            results = ii3.find(dict(name=name))
+            results = ii3.find(filters=dict(name=name))
         elapse3 = time.clock() - st
 
         print("n_rows = %s, n_search = %s:" % (n_rows, n_search))
-        print("    v1: %.8f" % elapse1)
-        print("    v2: %.8f" % elapse2)
-        print("    v3: %.8f" % elapse3)
+        print("    invsearch: %.8f" % elapse1)
+        print("    brute force: %.8f" % elapse2)
+        print("    sqlite: %.8f" % elapse3)
 
 
 if __name__ == "__main__":

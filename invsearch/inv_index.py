@@ -114,7 +114,7 @@ class InvIndex(object):
                             pass
         self._index = _index
 
-    def find(self, filters):
+    def find(self, **filters):
         """
         Find documents.
 
@@ -137,13 +137,12 @@ class InvIndex(object):
         pk_list.sort()
         return [self._data[pk] for pk in pk_list]
 
-    def find_one(self, filters):
+    def find_one(self, **filters):
         """
         Find one matching document.
 
         if no document or multi documents found, raise error
         """
-
         pk_columns = set.intersection(self._pk_columns, set(filters.keys()))
         if len(pk_columns):
             key = pk_columns.pop()

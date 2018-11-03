@@ -52,7 +52,25 @@
 Welcome to ``invsearch`` Documentation
 ==============================================================================
 
-Documentation for ``invsearch``.
+A fast document search engine allow search by field and value pair.
+
+Example:
+
+.. code-block:: python
+
+    >>> from invsearch import InvIndex
+    >>> ii = InvIndex([
+    ...     {"id": 1, "name": "Alice", "friends": [2, 3]},
+    ...     {"id": 2, "name": "Bob", "age": 15, "friends": [1, 3]},
+    ...     {"id": 3, "name": "Cathy", "age": None, "friends": [1, 2]},
+    ...     {"id": 4, "name": "Bob", "age": None},
+    ... ])
+    >>> ii.find_one(id=1)
+    {"id": 1, "name": "Alice", "friends": [2, 3]}
+    >>> ii.find(name="Bob")
+    [{"id": 2, "name": "Bob", "age": 15, "friends": [1, 3]}, {"id": 4, "name": "Bob", "age": None}]
+    >>> ii.by_id(id=1)
+    {"id": 1, "name": "Alice", "friends": [2, 3]}
 
 
 .. _install:
